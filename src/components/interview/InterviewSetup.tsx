@@ -1,16 +1,18 @@
 
 import { useState } from "react";
-import { Briefcase, Code, Clock, HelpCircle } from "lucide-react";
+import { Briefcase, Code, Clock, HelpCircle, ChevronLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import GlassMorphism from "../ui/GlassMorphism";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 
 interface InterviewSetupProps {
   onSubmit: (role: string, techStack: string, experience: string) => void;
+  onBack?: () => void;
   isLoading?: boolean;
 }
 
-const InterviewSetup = ({ onSubmit, isLoading = false }: InterviewSetupProps) => {
+const InterviewSetup = ({ onSubmit, onBack, isLoading = false }: InterviewSetupProps) => {
   const [role, setRole] = useState("");
   const [techStack, setTechStack] = useState("");
   const [experience, setExperience] = useState("1-3");
@@ -56,7 +58,27 @@ const InterviewSetup = ({ onSubmit, isLoading = false }: InterviewSetupProps) =>
   ];
 
   return (
-    <>
+    <div className="space-y-6">
+      {onBack && (
+        <div className="flex items-center gap-4 mb-6">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onBack}
+            className="text-muted-foreground"
+          >
+            <ChevronLeft className="mr-2 h-4 w-4" />
+            Back
+          </Button>
+          <div>
+            <h2 className="text-2xl font-bold">Interview Setup</h2>
+            <p className="text-muted-foreground">
+              Configure your mock interview session
+            </p>
+          </div>
+        </div>
+      )}
+
       <Card className="mb-6">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -176,7 +198,7 @@ const InterviewSetup = ({ onSubmit, isLoading = false }: InterviewSetupProps) =>
           </button>
         </form>
       </GlassMorphism>
-    </>
+    </div>
   );
 };
 

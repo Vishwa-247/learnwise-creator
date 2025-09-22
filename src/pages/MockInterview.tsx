@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import InterviewTypeSelector from "@/components/interview/InterviewTypeSelector";
+import TechnicalInterviewSetup from "@/components/interview/TechnicalInterviewSetup";
 import InterviewSetup from "@/components/interview/InterviewSetup";
 import VideoRecorder from "@/components/interview/VideoRecorder";
 import Container from "@/components/ui/Container";
@@ -590,8 +591,20 @@ const MockInterview = () => {
           
           {stage === InterviewStage.Setup && (
             <div className="space-y-8">
-              <InterviewSetup onSubmit={handleInterviewSetup} isLoading={isLoading} />
-              {renderRecentInterviews()}
+              {selectedInterviewType === 'technical' ? (
+                <TechnicalInterviewSetup 
+                  onSubmit={handleInterviewSetup} 
+                  onBack={() => setStage(InterviewStage.TypeSelection)}
+                  isLoading={isLoading} 
+                />
+              ) : (
+                <InterviewSetup 
+                  onSubmit={handleInterviewSetup}
+                  onBack={() => setStage(InterviewStage.TypeSelection)}
+                  isLoading={isLoading} 
+                />
+              )}
+              {selectedInterviewType !== 'technical' && renderRecentInterviews()}
             </div>
           )}
           
