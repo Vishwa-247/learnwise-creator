@@ -843,6 +843,130 @@ export type Database = {
           },
         ]
       }
+      interview_responses: {
+        Row: {
+          ai_analysis: Json | null
+          audio_recording_path: string | null
+          confidence_score: number | null
+          created_at: string
+          facial_analysis: Json | null
+          id: string
+          question_index: number
+          question_text: string
+          response_text: string | null
+          response_time_seconds: number | null
+          session_id: string
+          user_id: string
+          video_recording_path: string | null
+        }
+        Insert: {
+          ai_analysis?: Json | null
+          audio_recording_path?: string | null
+          confidence_score?: number | null
+          created_at?: string
+          facial_analysis?: Json | null
+          id?: string
+          question_index: number
+          question_text: string
+          response_text?: string | null
+          response_time_seconds?: number | null
+          session_id: string
+          user_id: string
+          video_recording_path?: string | null
+        }
+        Update: {
+          ai_analysis?: Json | null
+          audio_recording_path?: string | null
+          confidence_score?: number | null
+          created_at?: string
+          facial_analysis?: Json | null
+          id?: string
+          question_index?: number
+          question_text?: string
+          response_text?: string | null
+          response_time_seconds?: number | null
+          session_id?: string
+          user_id?: string
+          video_recording_path?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "interview_responses_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "interview_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      interview_sessions: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          current_question_index: number | null
+          experience_level: string | null
+          feedback: Json | null
+          id: string
+          job_role: string | null
+          max_possible_score: number | null
+          questions_data: Json
+          resume_id: string | null
+          session_type: string
+          started_at: string
+          status: string
+          tech_stack: string | null
+          total_score: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          current_question_index?: number | null
+          experience_level?: string | null
+          feedback?: Json | null
+          id?: string
+          job_role?: string | null
+          max_possible_score?: number | null
+          questions_data?: Json
+          resume_id?: string | null
+          session_type: string
+          started_at?: string
+          status?: string
+          tech_stack?: string | null
+          total_score?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          current_question_index?: number | null
+          experience_level?: string | null
+          feedback?: Json | null
+          id?: string
+          job_role?: string | null
+          max_possible_score?: number | null
+          questions_data?: Json
+          resume_id?: string | null
+          session_type?: string
+          started_at?: string
+          status?: string
+          tech_stack?: string | null
+          total_score?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "interview_sessions_resume_id_fkey"
+            columns: ["resume_id"]
+            isOneToOne: false
+            referencedRelation: "user_resumes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profile_analytics: {
         Row: {
           action_type: string
@@ -1184,11 +1308,13 @@ export type Database = {
           extraction_status: string | null
           file_path: string
           file_size: number | null
+          file_type: string | null
           filename: string
           id: string
           processing_status: string | null
           recommendations: string[] | null
           skill_gaps: string[] | null
+          storage_path: string | null
           updated_at: string
           upload_date: string
           user_id: string
@@ -1201,11 +1327,13 @@ export type Database = {
           extraction_status?: string | null
           file_path: string
           file_size?: number | null
+          file_type?: string | null
           filename: string
           id?: string
           processing_status?: string | null
           recommendations?: string[] | null
           skill_gaps?: string[] | null
+          storage_path?: string | null
           updated_at?: string
           upload_date?: string
           user_id: string
@@ -1218,11 +1346,13 @@ export type Database = {
           extraction_status?: string | null
           file_path?: string
           file_size?: number | null
+          file_type?: string | null
           filename?: string
           id?: string
           processing_status?: string | null
           recommendations?: string[] | null
           skill_gaps?: string[] | null
+          storage_path?: string | null
           updated_at?: string
           upload_date?: string
           user_id?: string
