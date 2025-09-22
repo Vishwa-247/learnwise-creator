@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import Container from "@/components/ui/Container";
-import CSECourseForm from "@/components/course/CSECourseForm";
+import CourseForm from "@/components/course/CourseForm";
 import HowItWorks from "@/components/course/HowItWorks";
 import LoadingOverlay from "@/components/ui/LoadingOverlay";
 import ContentGenerationStatus from "@/components/course/ContentGenerationStatus";
@@ -58,7 +58,7 @@ const CourseGenerator = () => {
     }
   ]);
     
-  const handleSubmit = async (courseName: string, purpose: CourseType['purpose'], difficulty: CourseType['difficulty'], customPrompt?: string, includeExamPrep?: boolean) => {
+  const handleSubmit = async (courseName: string, purpose: CourseType['purpose'], difficulty: CourseType['difficulty'], customPrompt?: string) => {
     if (!user) {
       navigate('/auth');
       return;
@@ -112,7 +112,7 @@ const CourseGenerator = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
-          <CSECourseForm onSubmit={handleSubmit} isLoading={isLoading} />
+          <CourseForm onSubmit={handleSubmit} isLoading={isLoading} />
         </div>
         
         <div>

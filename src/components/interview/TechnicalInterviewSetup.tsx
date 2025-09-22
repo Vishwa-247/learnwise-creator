@@ -85,15 +85,25 @@ const TechnicalInterviewSetup = ({ onSubmit, onBack, isLoading }: TechnicalInter
         setResumeData(resume);
         // Auto-fill fields based on resume if available
         if (resume.ai_analysis && typeof resume.ai_analysis === 'object') {
-          const analysis = resume.ai_analysis as any;
-          if (analysis.suggested_roles && Array.isArray(analysis.suggested_roles) && analysis.suggested_roles.length > 0) {
-            setRole(analysis.suggested_roles[0]);
-          }
-          if (analysis.technical_skills && Array.isArray(analysis.technical_skills) && analysis.technical_skills.length > 0) {
-            setTechStack(analysis.technical_skills.slice(0, 3).join(', '));
-          }
-          if (analysis.experience_level && typeof analysis.experience_level === 'string') {
-            setExperience(analysis.experience_level);
+          // Safely check the analysis structure without assuming specific properties exist
+          try {
+            const analysis = resume.ai_analysis as Record<string, any>;
+            
+            // Only set values if they exist and are of expected types
+            if (analysis.suggested_roles && Array.isArray(analysis.suggested_roles) && analysis.suggested_roles.length > 0) {
+              setRole(String(analysis.suggested_roles[0]));
+            }
+            
+            if (analysis.technical_skills && Array.isArray(analysis.technical_skills) && analysis.technical_skills.length > 0) {
+              const skills = analysis.technical_skills.slice(0, 3).map(skill => String(skill)).join(', ');
+              setTechStack(skills);
+            }
+            
+            if (analysis.experience_level && typeof analysis.experience_level === 'string') {
+              setExperience(analysis.experience_level);
+            }
+          } catch (error) {
+            console.log('Error parsing resume analysis:', error);
           }
         }
       }

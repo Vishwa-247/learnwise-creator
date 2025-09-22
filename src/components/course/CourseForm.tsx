@@ -1,11 +1,10 @@
-
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import GlassMorphism from "../ui/GlassMorphism";
 import { CourseType } from "@/types";
 
 interface CourseFormProps {
-  onSubmit: (courseName: string, purpose: CourseType['purpose'], difficulty: CourseType['difficulty']) => void;
+  onSubmit: (courseName: string, purpose: CourseType['purpose'], difficulty: CourseType['difficulty'], customPrompt?: string) => void;
   isLoading: boolean;
 }
 
@@ -13,11 +12,12 @@ const CourseForm = ({ onSubmit, isLoading }: CourseFormProps) => {
   const [courseName, setCourseName] = useState("");
   const [purpose, setPurpose] = useState<CourseType['purpose']>("exam");
   const [difficulty, setDifficulty] = useState<CourseType['difficulty']>("intermediate");
+  const [customPrompt, setCustomPrompt] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (courseName.trim()) {
-      onSubmit(courseName, purpose, difficulty);
+      onSubmit(courseName, purpose, difficulty, customPrompt.trim() || undefined);
     }
   };
 
@@ -33,7 +33,6 @@ const CourseForm = ({ onSubmit, isLoading }: CourseFormProps) => {
     { value: "beginner" as const, label: "Beginner" },
     { value: "intermediate" as const, label: "Intermediate" },
     { value: "advanced" as const, label: "Advanced" },
-    { value: "expert" as const, label: "Expert" },
   ];
 
   return (
@@ -89,7 +88,7 @@ const CourseForm = ({ onSubmit, isLoading }: CourseFormProps) => {
           >
             Level
           </label>
-          <div className="grid grid-cols-4 gap-2">
+          <div className="grid grid-cols-3 gap-2">
             {difficultyOptions.map((option) => (
               <button
                 key={option.value}
@@ -105,6 +104,23 @@ const CourseForm = ({ onSubmit, isLoading }: CourseFormProps) => {
               </button>
             ))}
           </div>
+        </div>
+
+        <div className="space-y-2">
+          <label
+            htmlFor="customPrompt"
+            className="block text-sm font-medium text-foreground"
+          >
+            Custom Requirements (Optional)
+          </label>
+          <textarea
+            id="customPrompt"
+            value={customPrompt}
+            onChange={(e) => setCustomPrompt(e.target.value)}
+            placeholder="Add specific requirements or focus areas for your course..."
+            rows={3}
+            className="w-full px-4 py-2 bg-white/20 dark:bg-black/20 border border-border rounded-lg focus:border-primary focus:ring-1 focus:ring-primary outline-none text-foreground resize-none"
+          />
         </div>
 
         <button

@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, Video, Medal, MessageSquare, AlertCircle, Code, Target, CheckCircle, User } from "lucide-react";
+import { ArrowRight, Video, Medal, MessageSquare, AlertCircle, Code, Target, CheckCircle, User, BookOpen, GraduationCap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -11,12 +11,61 @@ import Chatbot from "@/components/Chatbot";
 import { useToast } from "@/hooks/use-toast";
 import { dsaTopics } from "@/data/dsaProblems";
 import { companies } from "@/data/companyProblems";
+import { supabase } from "@/integrations/supabase/client";
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const [showChatbot, setShowChatbot] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
+  const [userProfile, setUserProfile] = useState<any>(null);
+  const [recentCourses, setRecentCourses] = useState<any[]>([]);
+  const [courseStats, setCourseStats] = useState({
+    total: 0,
+    completed: 0,
+    inProgress: 0
+  });
+
+  // Load user data on mount
+  useEffect(() => {
+    if (user) {
+      loadUserData();
+    }
+  }, [user]);
+
+  const loadUserData = async () => {
+    try {
+      // Load user profile
+      const { data: profile } = await supabase
+        .from('user_profiles')
+        .select('*')
+        .eq('user_id', user?.id)
+        .single();
+      
+      if (profile) {
+        setUserProfile(profile);
+      }
+
+      // Load recent courses
+      const { data: courses } = await supabase
+        .from('courses')
+        .select('*')
+        .eq('user_id', user?.id)
+        .order('created_at', { ascending: false })
+        .limit(5);
+      
+      if (courses) {
+        setRecentCourses(courses);
+        setCourseStats({
+          total: courses.length,
+          completed: courses.filter(c => c.status === 'completed').length,
+          inProgress: courses.filter(c => c.status === 'generating' || c.status === 'draft').length
+        });
+      }
+    } catch (error) {
+      console.error('Error loading user data:', error);
+    }
+  };
 
   // Real interviews data - empty by default, will be populated from backend
   const displayInterviews: any[] = [];
@@ -121,8 +170,9 @@ const Dashboard = () => {
           onValueChange={setActiveTab}
           className="space-y-6"
         >
-          <TabsList className="grid grid-cols-3 w-full max-w-2xl mx-auto">
+          <TabsList className="grid grid-cols-4 w-full max-w-2xl mx-auto">
             <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="courses">Courses</TabsTrigger>
             <TabsTrigger value="interviews">Interviews</TabsTrigger>
             <TabsTrigger value="dsa">DSA Progress</TabsTrigger>
           </TabsList>
@@ -138,7 +188,21 @@ const Dashboard = () => {
                 <CardContent>
                   <div className="flex items-center">
                     <User className="mr-2 h-4 w-4 text-primary" />
-                    <div className="text-2xl font-bold">-</div>
+                    <div className="text-2xl font-bold">{userProfile?.completion_percentage || 0}%</div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                    Generated Courses
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center">
+                    <BookOpen className="mr-2 h-4 w-4 text-primary" />
+                    <div className="text-2xl font-bold">{courseStats.total}</div>
                   </div>
                 </CardContent>
               </Card>
@@ -166,7 +230,7 @@ const Dashboard = () => {
                 <CardContent>
                   <div className="flex items-center">
                     <Medal className="mr-2 h-4 w-4 text-primary" />
-                    <div className="text-2xl font-bold">-</div>
+                    <div className="text-2xl font-bold">{userProfile?.profile_strength_score || 0}</div>
                   </div>
                 </CardContent>
               </Card>
@@ -188,13 +252,13 @@ const Dashboard = () => {
               <Card>
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium text-muted-foreground">
-                    Weekly Analytics
+                    Course Analytics
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-center">
-                    <AlertCircle className="mr-2 h-4 w-4 text-primary" />
-                    <div className="text-2xl font-bold">-</div>
+                    <GraduationCap className="mr-2 h-4 w-4 text-primary" />
+                    <div className="text-2xl font-bold">{courseStats.completed}/{courseStats.total}</div>
                   </div>
                 </CardContent>
               </Card>
@@ -268,6 +332,99 @@ const Dashboard = () => {
             </div>
 
             {showWelcomeCard && <WelcomeCard />}
+          </TabsContent>
+
+          <TabsContent value="courses" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Course Analytics</CardTitle>
+                  <CardDescription>Your course generation statistics</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-primary">{courseStats.total}</div>
+                        <div className="text-sm text-muted-foreground">Total Courses</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-green-500">{courseStats.completed}</div>
+                        <div className="text-sm text-muted-foreground">Completed</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-amber-500">{courseStats.inProgress}</div>
+                        <div className="text-sm text-muted-foreground">In Progress</div>
+                      </div>
+                    </div>
+                    <Button className="w-full" asChild>
+                      <Link to="/course-generator">
+                        <BookOpen className="mr-2 h-4 w-4" />
+                        Generate New Course
+                      </Link>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Recent Courses</CardTitle>
+                  <CardDescription>Your latest generated courses</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {recentCourses.length > 0 ? (
+                    <div className="space-y-4">
+                      {recentCourses.map((course) => (
+                        <div key={course.id} className="flex justify-between items-center p-3 border rounded-lg">
+                          <div className="flex-1">
+                            <div className="font-medium text-sm">{course.title}</div>
+                            <div className="text-xs text-muted-foreground">
+                              {course.difficulty} • {course.purpose}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              {new Date(course.created_at).toLocaleDateString()}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className={`text-xs px-2 py-1 rounded-full ${
+                              course.status === 'completed' ? 'bg-green-100 text-green-800' :
+                              course.status === 'generating' ? 'bg-amber-100 text-amber-800' :
+                              'bg-gray-100 text-gray-800'
+                            }`}>
+                              {course.status}
+                            </span>
+                            <Button variant="ghost" size="sm" asChild>
+                              <Link to={`/course/${course.id}`}>
+                                <ArrowRight className="h-3 w-3" />
+                              </Link>
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                      <Button variant="outline" size="sm" className="w-full" asChild>
+                        <Link to="/courses">
+                          View All Courses
+                        </Link>
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <BookOpen className="h-12 w-12 mx-auto text-primary mb-4" />
+                      <h3 className="text-lg font-medium mb-2">No Courses Yet</h3>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        Generate your first course to get started with personalized learning
+                      </p>
+                      <Button asChild>
+                        <Link to="/course-generator">
+                          Generate Course <ArrowRight className="ml-2 h-4 w-4" />
+                        </Link>
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
           <TabsContent value="interviews">
