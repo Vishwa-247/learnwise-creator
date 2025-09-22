@@ -233,9 +233,28 @@ export const courseService = {
     return data;
   },
 
-  // Legacy methods for compatibility
-  async getCourseById(courseId: string): Promise<CourseType> {
-    return this.getCourse(courseId);
+  async generateCourse(
+    courseName: string, 
+    purpose: CourseType['purpose'], 
+    difficulty: CourseType['difficulty'],
+    userId: string,
+    geminiApiKey?: string
+  ): Promise<string> {
+    const { data, error } = await supabase.functions.invoke('course-generator-agent', {
+      body: {
+        courseName,
+        purpose,
+        difficulty,
+        userId,
+        geminiApiKey
+      }
+    });
+
+    if (error) {
+      throw new Error(`Failed to start course generation: ${error.message}`);
+    }
+
+    return data.courseId;
   },
 
   async getCourseContent(courseId: string): Promise<CourseType> {

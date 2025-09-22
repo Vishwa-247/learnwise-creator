@@ -24,12 +24,12 @@ const Navbar = () => {
   const navigate = useNavigate();
 
   const navLinks = [
-    { name: "Home", href: "/" },
-    { name: "Resume Analyzer", href: "/resume-analyzer" },
-    { name: "DSA Sheet", href: "/dsa-sheet" },
-    { name: "Profile Builder", href: "/profile-builder" },
-    { name: "Interview", href: "/mock-interview" },
     { name: "Dashboard", href: "/dashboard" },
+    { name: "Courses", href: "/courses" },
+    { name: "DSA", href: "/dsa-sheet" },
+    { name: "Interview", href: "/mock-interview" },
+    { name: "Resume", href: "/resume-analyzer" },
+    { name: "Profile", href: "/profile-builder" },
   ];
 
   useEffect(() => {

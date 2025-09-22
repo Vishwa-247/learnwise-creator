@@ -16,6 +16,10 @@ import ResumeAnalyzer from "@/pages/ResumeAnalyzer";
 import DebugPage from "@/pages/DebugPage";
 import NotFound from "@/pages/NotFound";
 import FutureIntegrations from "@/pages/FutureIntegrations";
+import Courses from "@/pages/Courses";
+import CourseGenerator from "@/pages/CourseGenerator";
+import CourseDetail from "@/pages/CourseDetail";
+import Settings from "@/pages/Settings";
 import { InterviewProvider } from "@/context/InterviewContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 
@@ -36,7 +40,38 @@ const App = () => (
           <Routes>
             <Route path="/auth" element={<Auth />} />
             <Route path="/" element={<Layout><Index /></Layout>} />
-            <Route path="dsa-sheet" element={
+            
+            {/* Course Routes */}
+            <Route path="/courses" element={
+              <Layout>
+                <ProtectedRoute>
+                  <Courses />
+                </ProtectedRoute>
+              </Layout>
+            } />
+            <Route path="/course-generator" element={
+              <Layout>
+                <ProtectedRoute>
+                  <CourseGenerator />
+                </ProtectedRoute>
+              </Layout>
+            } />
+            <Route path="/course/:id" element={
+              <Layout>
+                <ProtectedRoute>
+                  <CourseDetail />
+                </ProtectedRoute>
+              </Layout>
+            } />
+            <Route path="/settings" element={
+              <Layout>
+                <ProtectedRoute>
+                  <Settings />
+                </ProtectedRoute>
+              </Layout>
+            } />
+            
+            <Route path="/dsa-sheet" element={
               <Layout>
                 <ProtectedRoute>
                   <DSASheet />

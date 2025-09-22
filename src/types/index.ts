@@ -6,6 +6,9 @@ export type CourseType = {
   purpose: 'exam' | 'job_interview' | 'practice' | 'coding_preparation' | 'other';
   difficulty: 'beginner' | 'intermediate' | 'advanced' | 'expert';
   summary?: string;
+  status?: string;
+  progress_percentage?: number;
+  completion_time_estimate?: number;
   created_at: string;
   content?: {
     status?: string;

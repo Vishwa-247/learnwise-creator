@@ -53,104 +53,27 @@ const CourseGenerator = () => {
     }
   ]);
   
-  const { 
-    generationInBackground, 
-    error, 
-    progress,
-    setError, 
-    startCourseGeneration,
-    generationStartTime
-  } = useCourseGeneration();
-
-  // Always succeed with course generation
-  const generateCourseMutation = useMutation({
-    mutationFn: async ({
-      courseName, 
-      purpose, 
-      difficulty
-    }: {
-      courseName: string;
-      purpose: CourseType['purpose'];
-      difficulty: CourseType['difficulty'];
-    }) => {
-      // Generate a random ID for the course
-      const courseId = crypto.randomUUID();
-      
-      if (user) {
-        // Attempt to use the hook method if user exists
-        return startCourseGeneration(courseName, purpose, difficulty, user.id);
+    const { user } = useAuth();
+    const navigate = useNavigate();
+    
+    const handleSubmit = async (courseName: string, purpose: CourseType['purpose'], difficulty: CourseType['difficulty']) => {
+      if (!user) {
+        navigate('/auth');
+        return;
       }
       
-      // If no user, just return the ID (we'll handle generation)
-      return courseId;
-    },
-    onSuccess: (courseId) => {
-      sonnerToast.info('Course Generation Started', {
-        description: 'Your course is being generated. This process will take about 3 minutes.',
-        duration: 5000,
-      });
-      
-      // Add the newly created course to the recent courses list
-      const newCourse = {
-        id: courseId,
-        title: generateCourseMutation.variables?.courseName || "New Course",
-        purpose: generateCourseMutation.variables?.purpose || "general_knowledge",
-        difficulty: generateCourseMutation.variables?.difficulty || "beginner",
-        created_at: new Date().toISOString(),
-        user_id: user?.id || "guest-user",
-        content: { status: 'generating' }
-      } as CourseType;
-      
-      setRecentCourses(prev => [newCourse, ...prev]);
-      
-      // Always navigate to profile-builder after short delay
-      setTimeout(() => {
-        navigate('/profile-builder');
-      }, 1000);
-    },
-    onError: () => {
-      // Never show errors - generate dummy data instead
-      const courseId = crypto.randomUUID();
-      const newCourse = {
-        id: courseId,
-        title: generateCourseMutation.variables?.courseName || "New Course",
-        purpose: generateCourseMutation.variables?.purpose || "practice", // Changed default to "practice"
-        difficulty: generateCourseMutation.variables?.difficulty || "beginner",
-        created_at: new Date().toISOString(),
-        user_id: user?.id || "guest-user",
-        content: { status: 'generating' }
-      } as CourseType;
-      
-      setRecentCourses(prev => [newCourse, ...prev]);
-      
-      sonnerToast.info('Course Generation Started', {
-        description: 'Your course is being generated with example data.',
-        duration: 3000,
-      });
-      
-      navigate('/profile-builder');
-    },
-    onSettled: () => {
-      setIsLoading(false);
-    }
-  });
-
-  const handleSubmit = async (
-    courseName: string, 
-    purpose: CourseType['purpose'], 
-    difficulty: CourseType['difficulty']
-  ) => {
-    setIsLoading(true);
-    setError(null);
-    
-    toast({
-      title: "Starting Course Generation",
-      description: "This process will continue in the background and take about 3 minutes. You can navigate to other pages.",
-    });
-    
-    // Use the mutation to handle the API call
-    generateCourseMutation.mutate({ courseName, purpose, difficulty });
-  };
+      try {
+        const courseId = await courseService.generateCourse(courseName, purpose, difficulty, user.id);
+        navigate(`/course/${courseId}`);
+      } catch (error) {
+        console.error('Course generation failed:', error);
+        toast({
+          title: "Error",
+          description: "Failed to generate course. Please try again.",
+          variant: "destructive",
+        });
+      }
+    };
 
   return (
     <Container className="py-12">
