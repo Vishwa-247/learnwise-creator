@@ -16,18 +16,23 @@ import { useMutation } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { courseService } from "@/api/services/courseService";
 
 const CourseGenerator = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [generationInBackground, setGenerationInBackground] = useState(false);
+  const [generationStartTime, setGenerationStartTime] = useState<Date | null>(null);
+  const [progress, setProgress] = useState(0);
   const [recentCourses, setRecentCourses] = useState<CourseType[]>([
     // Dummy recent courses that always show up
     {
       id: "dummy-course-1",
       title: "React Hooks Masterclass",
-      purpose: "practice", // Changed from "professional_development" to "practice"
+      purpose: "practice",
       difficulty: "intermediate",
       created_at: new Date().toISOString(),
       user_id: "user-123",
@@ -36,44 +41,49 @@ const CourseGenerator = () => {
     {
       id: "dummy-course-2",
       title: "Python for Data Science",
-      purpose: "job_interview", // Changed from "career_change" to "job_interview"
+      purpose: "job_interview",
       difficulty: "beginner",
-      created_at: new Date(Date.now() - 86400000).toISOString(), // Yesterday
+      created_at: new Date(Date.now() - 86400000).toISOString(),
       user_id: "user-123",
       content: { status: 'complete' }
     },
     {
       id: "dummy-course-3",
       title: "Advanced TypeScript",
-      purpose: "other", // Changed from "general_knowledge" to "other"
+      purpose: "other",
       difficulty: "advanced",
-      created_at: new Date(Date.now() - 172800000).toISOString(), // 2 days ago
+      created_at: new Date(Date.now() - 172800000).toISOString(),
       user_id: "user-123",
       content: { status: 'complete' }
     }
   ]);
-  
-    const { user } = useAuth();
-    const navigate = useNavigate();
     
-    const handleSubmit = async (courseName: string, purpose: CourseType['purpose'], difficulty: CourseType['difficulty']) => {
-      if (!user) {
-        navigate('/auth');
-        return;
-      }
-      
-      try {
-        const courseId = await courseService.generateCourse(courseName, purpose, difficulty, user.id);
-        navigate(`/course/${courseId}`);
-      } catch (error) {
-        console.error('Course generation failed:', error);
-        toast({
-          title: "Error",
-          description: "Failed to generate course. Please try again.",
-          variant: "destructive",
-        });
-      }
-    };
+  const handleSubmit = async (courseName: string, purpose: CourseType['purpose'], difficulty: CourseType['difficulty']) => {
+    if (!user) {
+      navigate('/auth');
+      return;
+    }
+    
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const courseId = await courseService.generateCourse(courseName, purpose, difficulty, user.id);
+      setGenerationInBackground(true);
+      setGenerationStartTime(new Date());
+      navigate(`/course/${courseId}`);
+    } catch (error) {
+      console.error('Course generation failed:', error);
+      setError('Failed to generate course. Please try again.');
+      toast({
+        title: "Error",
+        description: "Failed to generate course. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <Container className="py-12">
