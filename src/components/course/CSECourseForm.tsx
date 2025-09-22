@@ -3,9 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, Code, Database, Cpu, Globe, BookOpen, GraduationCap, Lightbulb } from "lucide-react";
+import { Loader2, GraduationCap } from "lucide-react";
 import GlassMorphism from "@/components/ui/GlassMorphism";
 import { CourseType } from "@/types";
 
@@ -13,17 +12,6 @@ interface CSECourseFormProps {
   onSubmit: (courseName: string, purpose: CourseType['purpose'], difficulty: CourseType['difficulty'], customPrompt?: string, includeExamPrep?: boolean) => void;
   isLoading: boolean;
 }
-
-const cseSubjects = [
-  { name: "Data Structures & Algorithms", icon: <Code className="h-4 w-4" />, category: "core" },
-  { name: "Database Management Systems", icon: <Database className="h-4 w-4" />, category: "core" },
-  { name: "Computer Networks", icon: <Globe className="h-4 w-4" />, category: "core" },
-  { name: "Operating Systems", icon: <Cpu className="h-4 w-4" />, category: "core" },
-  { name: "Software Engineering", icon: <BookOpen className="h-4 w-4" />, category: "core" },
-  { name: "Machine Learning", icon: <Lightbulb className="h-4 w-4" />, category: "advanced" },
-  { name: "Computer Graphics", icon: <Cpu className="h-4 w-4" />, category: "advanced" },
-  { name: "Compiler Design", icon: <Code className="h-4 w-4" />, category: "advanced" },
-];
 
 const purposeOptions = [
   { value: "exam", label: "Exam Preparation", description: "Study for upcoming exams or assessments" },
@@ -39,23 +27,15 @@ const difficultyOptions = [
 ];
 
 const CSECourseForm = ({ onSubmit, isLoading }: CSECourseFormProps) => {
-  const [selectedSubject, setSelectedSubject] = useState<string>("");
-  const [customTopic, setCustomTopic] = useState<string>("");
+  const [courseName, setCourseName] = useState<string>("");
   const [purpose, setPurpose] = useState<CourseType['purpose']>("exam");
   const [difficulty, setDifficulty] = useState<CourseType['difficulty']>("intermediate");
   const [customPrompt, setCustomPrompt] = useState<string>("");
   const [includeExamPrep, setIncludeExamPrep] = useState<boolean>(true);
   const [showNonCSEWarning, setShowNonCSEWarning] = useState<boolean>(false);
 
-  const handleSubjectSelect = (subject: string) => {
-    setSelectedSubject(subject);
-    setCustomTopic("");
-    setShowNonCSEWarning(false);
-  };
-
-  const handleCustomTopicChange = (value: string) => {
-    setCustomTopic(value);
-    setSelectedSubject("");
+  const handleCourseNameChange = (value: string) => {
+    setCourseName(value);
     
     // Check if the topic seems to be non-CSE related
     const nonCSEKeywords = ['biology', 'chemistry', 'physics', 'history', 'geography', 'literature', 'arts', 'music', 'medical', 'civil', 'mechanical', 'electrical'];
@@ -67,7 +47,6 @@ const CSECourseForm = ({ onSubmit, isLoading }: CSECourseFormProps) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const courseName = selectedSubject || customTopic;
     
     if (!courseName.trim()) return;
     
@@ -78,7 +57,7 @@ const CSECourseForm = ({ onSubmit, isLoading }: CSECourseFormProps) => {
     onSubmit(courseName, purpose, difficulty, customPrompt, includeExamPrep);
   };
 
-  const isFormValid = (selectedSubject || customTopic.trim()) && !showNonCSEWarning;
+  const isFormValid = courseName.trim() && !showNonCSEWarning;
 
   return (
     <GlassMorphism className="p-6">
@@ -93,45 +72,26 @@ const CSECourseForm = ({ onSubmit, isLoading }: CSECourseFormProps) => {
           </p>
         </div>
 
-        {/* Subject Selection */}
-        <div className="space-y-4">
-          <Label className="text-base font-medium">Select CSE Subject</Label>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-            {cseSubjects.map((subject) => (
-              <Button
-                key={subject.name}
-                type="button"
-                variant={selectedSubject === subject.name ? "default" : "outline"}
-                className="h-auto p-3 flex flex-col items-center gap-2 text-left"
-                onClick={() => handleSubjectSelect(subject.name)}
-              >
-                {subject.icon}
-                <span className="text-xs text-center leading-tight">{subject.name}</span>
-                <Badge variant={subject.category === "core" ? "default" : "secondary"} className="text-xs">
-                  {subject.category}
-                </Badge>
-              </Button>
-            ))}
-          </div>
-        </div>
-
-        {/* Custom Topic Input */}
+        {/* Course Topic Input */}
         <div className="space-y-2">
-          <Label htmlFor="customTopic" className="text-base font-medium">Or Enter Custom Topic</Label>
+          <Label htmlFor="courseName" className="text-base font-medium">Course Topic</Label>
           <Input
-            id="customTopic"
-            placeholder="e.g., Advanced Graph Algorithms, React.js Fundamentals..."
-            value={customTopic}
-            onChange={(e) => handleCustomTopicChange(e.target.value)}
+            id="courseName"
+            placeholder="e.g., Data Structures and Algorithms, Machine Learning, Operating Systems..."
+            value={courseName}
+            onChange={(e) => handleCourseNameChange(e.target.value)}
             className="w-full"
           />
+          <p className="text-sm text-muted-foreground">
+            Enter any Computer Science Engineering topic you want to learn
+          </p>
         </div>
 
         {showNonCSEWarning && (
           <Alert variant="destructive">
             <AlertDescription>
               This platform is specifically designed for Computer Science Engineering students. 
-              Please select a CSE-related topic or choose from the predefined subjects above.
+              Please enter a CSE-related topic like Data Structures, Algorithms, Machine Learning, etc.
             </AlertDescription>
           </Alert>
         )}

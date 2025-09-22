@@ -84,15 +84,15 @@ const TechnicalInterviewSetup = ({ onSubmit, onBack, isLoading }: TechnicalInter
       if (resume && resume.extracted_text) {
         setResumeData(resume);
         // Auto-fill fields based on resume if available
-        if (resume.ai_analysis) {
-          const analysis = resume.ai_analysis;
-          if (analysis.suggested_roles && analysis.suggested_roles.length > 0) {
+        if (resume.ai_analysis && typeof resume.ai_analysis === 'object') {
+          const analysis = resume.ai_analysis as any;
+          if (analysis.suggested_roles && Array.isArray(analysis.suggested_roles) && analysis.suggested_roles.length > 0) {
             setRole(analysis.suggested_roles[0]);
           }
-          if (analysis.technical_skills && analysis.technical_skills.length > 0) {
+          if (analysis.technical_skills && Array.isArray(analysis.technical_skills) && analysis.technical_skills.length > 0) {
             setTechStack(analysis.technical_skills.slice(0, 3).join(', '));
           }
-          if (analysis.experience_level) {
+          if (analysis.experience_level && typeof analysis.experience_level === 'string') {
             setExperience(analysis.experience_level);
           }
         }
