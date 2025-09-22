@@ -26,10 +26,10 @@ const cseSubjects = [
 ];
 
 const purposeOptions = [
-  { value: "exam_preparation", label: "Exam Preparation", description: "Study for upcoming exams or assessments" },
+  { value: "exam", label: "Exam Preparation", description: "Study for upcoming exams or assessments" },
   { value: "job_interview", label: "Interview Prep", description: "Prepare for technical interviews" },
-  { value: "skill_development", label: "Skill Development", description: "Learn new concepts and improve understanding" },
-  { value: "project_work", label: "Project Work", description: "Support for ongoing projects or assignments" },
+  { value: "practice", label: "Skill Development", description: "Learn new concepts and improve understanding" },
+  { value: "coding_preparation", label: "Coding Practice", description: "Focus on programming and DSA preparation" },
 ];
 
 const difficultyOptions = [
@@ -41,7 +41,7 @@ const difficultyOptions = [
 const CSECourseForm = ({ onSubmit, isLoading }: CSECourseFormProps) => {
   const [selectedSubject, setSelectedSubject] = useState<string>("");
   const [customTopic, setCustomTopic] = useState<string>("");
-  const [purpose, setPurpose] = useState<CourseType['purpose']>("exam_preparation");
+  const [purpose, setPurpose] = useState<CourseType['purpose']>("exam");
   const [difficulty, setDifficulty] = useState<CourseType['difficulty']>("intermediate");
   const [customPrompt, setCustomPrompt] = useState<string>("");
   const [includeExamPrep, setIncludeExamPrep] = useState<boolean>(true);

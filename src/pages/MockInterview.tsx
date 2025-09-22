@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import InterviewTypeSelector from "@/components/interview/InterviewTypeSelector";
 import InterviewSetup from "@/components/interview/InterviewSetup";
 import VideoRecorder from "@/components/interview/VideoRecorder";
 import Container from "@/components/ui/Container";
@@ -77,7 +78,8 @@ const staticQuestions = {
 };
 
 enum InterviewStage {
-  Setup = "setup",
+  TypeSelection = "type_selection",
+  Setup = "setup", 
   Questions = "questions",
   Recording = "recording",
   Complete = "complete",
@@ -87,7 +89,8 @@ const MockInterview = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  const [stage, setStage] = useState<InterviewStage>(InterviewStage.Setup);
+  const [stage, setStage] = useState<InterviewStage>(InterviewStage.TypeSelection);
+  const [selectedInterviewType, setSelectedInterviewType] = useState<string>("");
   const [questions, setQuestions] = useState<string[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [isCourseTabActive, setCourseTabActive] = useState(false);
@@ -134,8 +137,11 @@ const MockInterview = () => {
     }
   ];
 
-  const handleInterviewSetup = (role: string, techStack: string, experience: string) => {
-    setIsLoading(true);
+  const handleTypeSelection = (type: string) => {
+    setSelectedInterviewType(type);
+    setStage(InterviewStage.Setup);
+  };
+    const handleInterviewSetup = (role: string, techStack: string, experience: string) => {
     
     // Generate a mock interview ID
     const mockId = `mock-${Date.now()}`;
@@ -257,7 +263,7 @@ const MockInterview = () => {
                 <Button 
                   variant="ghost" 
                   size="sm" 
-                  onClick={() => setStage(InterviewStage.Setup)}
+                  onClick={() => setStage(InterviewStage.TypeSelection)}
                   className="text-muted-foreground"
                 >
                   <ChevronLeft className="mr-2 h-4 w-4" />
@@ -575,6 +581,13 @@ const MockInterview = () => {
         </div>
       ) : (
         <>
+          {stage === InterviewStage.TypeSelection && (
+            <div className="space-y-8">
+              <InterviewTypeSelector onSelectType={handleTypeSelection} selectedType={selectedInterviewType} />
+              {renderRecentInterviews()}
+            </div>
+          )}
+          
           {stage === InterviewStage.Setup && (
             <div className="space-y-8">
               <InterviewSetup onSubmit={handleInterviewSetup} isLoading={isLoading} />
@@ -582,7 +595,7 @@ const MockInterview = () => {
             </div>
           )}
           
-          {stage !== InterviewStage.Setup && renderStage()}
+          {stage !== InterviewStage.TypeSelection && stage !== InterviewStage.Setup && renderStage()}
         </>
       )}
     </Container>
