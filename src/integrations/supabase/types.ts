@@ -635,9 +635,11 @@ export type Database = {
         Row: {
           completion_time_estimate: number | null
           created_at: string
+          custom_prompt: string | null
           difficulty: string
           generation_job_id: string | null
           id: string
+          include_exam_prep: boolean | null
           is_public: boolean | null
           progress_percentage: number | null
           purpose: string
@@ -651,9 +653,11 @@ export type Database = {
         Insert: {
           completion_time_estimate?: number | null
           created_at?: string
+          custom_prompt?: string | null
           difficulty: string
           generation_job_id?: string | null
           id?: string
+          include_exam_prep?: boolean | null
           is_public?: boolean | null
           progress_percentage?: number | null
           purpose: string
@@ -667,9 +671,11 @@ export type Database = {
         Update: {
           completion_time_estimate?: number | null
           created_at?: string
+          custom_prompt?: string | null
           difficulty?: string
           generation_job_id?: string | null
           id?: string
+          include_exam_prep?: boolean | null
           is_public?: boolean | null
           progress_percentage?: number | null
           purpose?: string
