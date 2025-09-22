@@ -599,8 +599,7 @@ const MockInterview = () => {
                 />
               ) : (
                 <InterviewSetup 
-                  onSubmit={handleInterviewSetup}
-                  onBack={() => setStage(InterviewStage.TypeSelection)}
+                  onSubmit={handleInterviewSetup} 
                   isLoading={isLoading} 
                 />
               )}
