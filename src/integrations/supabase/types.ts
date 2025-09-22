@@ -14,6 +14,57 @@ export type Database = {
   }
   public: {
     Tables: {
+      agent_logs: {
+        Row: {
+          agent_name: string
+          course_id: string | null
+          created_at: string | null
+          id: string
+          job_id: string | null
+          log_level: string
+          message: string
+          metadata: Json | null
+          user_id: string | null
+        }
+        Insert: {
+          agent_name: string
+          course_id?: string | null
+          created_at?: string | null
+          id?: string
+          job_id?: string | null
+          log_level?: string
+          message: string
+          metadata?: Json | null
+          user_id?: string | null
+        }
+        Update: {
+          agent_name?: string
+          course_id?: string | null
+          created_at?: string | null
+          id?: string
+          job_id?: string | null
+          log_level?: string
+          message?: string
+          metadata?: Json | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_logs_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_logs_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "course_generation_jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       course_chapters: {
         Row: {
           content: string
@@ -93,6 +144,62 @@ export type Database = {
           },
           {
             foreignKeyName: "course_flashcards_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      course_generation_jobs: {
+        Row: {
+          completed_at: string | null
+          course_id: string
+          created_at: string | null
+          current_step: string | null
+          error_message: string | null
+          id: string
+          job_type: string
+          metadata: Json | null
+          progress_percentage: number | null
+          started_at: string | null
+          status: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          course_id: string
+          created_at?: string | null
+          current_step?: string | null
+          error_message?: string | null
+          id?: string
+          job_type: string
+          metadata?: Json | null
+          progress_percentage?: number | null
+          started_at?: string | null
+          status?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          course_id?: string
+          created_at?: string | null
+          current_step?: string | null
+          error_message?: string | null
+          id?: string
+          job_type?: string
+          metadata?: Json | null
+          progress_percentage?: number | null
+          started_at?: string | null
+          status?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_generation_jobs_course_id_fkey"
             columns: ["course_id"]
             isOneToOne: false
             referencedRelation: "courses"
@@ -374,11 +481,14 @@ export type Database = {
           completion_time_estimate: number | null
           created_at: string
           difficulty: string
+          generation_job_id: string | null
           id: string
+          is_public: boolean | null
           progress_percentage: number | null
           purpose: string
           status: string
           summary: string | null
+          tags: string[] | null
           title: string
           updated_at: string
           user_id: string
@@ -387,11 +497,14 @@ export type Database = {
           completion_time_estimate?: number | null
           created_at?: string
           difficulty: string
+          generation_job_id?: string | null
           id?: string
+          is_public?: boolean | null
           progress_percentage?: number | null
           purpose: string
           status?: string
           summary?: string | null
+          tags?: string[] | null
           title: string
           updated_at?: string
           user_id: string
@@ -400,16 +513,27 @@ export type Database = {
           completion_time_estimate?: number | null
           created_at?: string
           difficulty?: string
+          generation_job_id?: string | null
           id?: string
+          is_public?: boolean | null
           progress_percentage?: number | null
           purpose?: string
           status?: string
           summary?: string | null
+          tags?: string[] | null
           title?: string
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "courses_generation_job_id_fkey"
+            columns: ["generation_job_id"]
+            isOneToOne: false
+            referencedRelation: "course_generation_jobs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       dsa_favorites: {
         Row: {
@@ -820,6 +944,39 @@ export type Database = {
           skill_gaps?: string[] | null
           updated_at?: string
           upload_date?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_settings: {
+        Row: {
+          created_at: string | null
+          gemini_api_key: string | null
+          id: string
+          preferred_difficulty: string | null
+          preferred_language: string | null
+          theme_preference: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          gemini_api_key?: string | null
+          id?: string
+          preferred_difficulty?: string | null
+          preferred_language?: string | null
+          theme_preference?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          gemini_api_key?: string | null
+          id?: string
+          preferred_difficulty?: string | null
+          preferred_language?: string | null
+          theme_preference?: string | null
+          updated_at?: string | null
           user_id?: string
         }
         Relationships: []
