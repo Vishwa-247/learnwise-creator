@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, Video, Medal, MessageSquare, AlertCircle, Code, Target, CheckCircle, User, BookOpen, GraduationCap } from "lucide-react";
+import { ArrowRight, Video, Medal, MessageSquare, AlertCircle, Code, Target, CheckCircle, User, BookOpen, GraduationCap, Activity } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { dsaTopics } from "@/data/dsaProblems";
 import { companies } from "@/data/companyProblems";
 import { supabase } from "@/integrations/supabase/client";
+import ServiceHealthMonitor from "@/components/debug/ServiceHealthMonitor";
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");

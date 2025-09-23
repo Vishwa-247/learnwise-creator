@@ -281,7 +281,7 @@ export const profileService = {
 
   async uploadResume(file: File, userId: string): Promise<ResumeUploadResponse> {
     try {
-      // Upload file to Supabase storage
+      // First upload file to Supabase storage
       const fileName = `${userId}/${Date.now()}_${file.name}`;
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('resume-files')
@@ -291,7 +291,53 @@ export const profileService = {
         throw new Error(`Failed to upload file: ${uploadError.message}`);
       }
 
-      // Save resume record
+      // Call AI extraction service (Profile Service Backend)
+      const formData = new FormData();
+      formData.append('resume', file);
+      formData.append('user_id', userId);
+
+      console.log('🤖 Calling AI extraction service...');
+      const extractionResponse = await fetch('http://localhost:8006/extract-profile', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!extractionResponse.ok) {
+        console.warn('AI extraction service unavailable, falling back to basic upload');
+        // Fallback to basic upload without AI extraction
+        const { data: resumeData, error: resumeError } = await supabase
+          .from('user_resumes')
+          .upsert({
+            user_id: userId,
+            filename: file.name,
+            file_path: uploadData.path,
+            file_size: file.size,
+            processing_status: 'completed',
+            extraction_status: 'failed',
+          })
+          .select()
+          .single();
+
+        return {
+          success: true,
+          extraction_id: resumeData?.id || '',
+          extracted_data: {},
+          confidence_score: 0,
+          message: 'Resume uploaded but AI extraction failed',
+          metadata: {
+            filename: file.name,
+            file_size: file.size,
+            extraction_date: new Date().toISOString(),
+            ai_provider: 'none',
+            storage_path: uploadData.path,
+          },
+        };
+      }
+
+      const extractionResult = await extractionResponse.json();
+      console.log('✅ AI extraction completed:', extractionResult);
+
+      // Save resume record with AI extraction data
       const { data: resumeData, error: resumeError } = await supabase
         .from('user_resumes')
         .upsert({
@@ -301,6 +347,10 @@ export const profileService = {
           file_size: file.size,
           processing_status: 'completed',
           extraction_status: 'completed',
+          extracted_text: extractionResult.extracted_text,
+          ai_analysis: extractionResult.extracted_data,
+          skill_gaps: extractionResult.skill_gaps || [],
+          recommendations: extractionResult.recommendations || [],
         })
         .select()
         .single();
@@ -312,14 +362,14 @@ export const profileService = {
       return {
         success: true,
         extraction_id: resumeData.id,
-        extracted_data: {},
-        confidence_score: 0.85,
-        message: 'Resume uploaded successfully',
+        extracted_data: extractionResult.extracted_data || {},
+        confidence_score: extractionResult.confidence_score || 0.85,
+        message: 'Resume uploaded and analyzed successfully',
         metadata: {
           filename: file.name,
           file_size: file.size,
           extraction_date: new Date().toISOString(),
-          ai_provider: 'supabase',
+          ai_provider: 'groq_ai',
           storage_path: uploadData.path,
         },
       };

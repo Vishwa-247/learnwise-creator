@@ -13,9 +13,12 @@ import { companies } from "@/data/companyProblems";
 import { useDSAFilters } from "@/hooks/useDSAFilters";
 import { useFavorites } from "@/hooks/useFavorites";
 import FavoritesTable from "@/components/FavoritesTable";
+import DSAChatbot from "@/components/dsa/DSAChatbot";
 
 const DSASheet = () => {
   const [activeTab, setActiveTab] = useState("topics");
+  const [chatbotOpen, setChatbotOpen] = useState(false);
+  const [chatbotMinimized, setChatbotMinimized] = useState(false);
   const { isFavorite, toggleFavorite } = useFavorites();
   
   const {
@@ -295,6 +298,28 @@ const DSASheet = () => {
           </div>
         </div>
       </Container>
+      
+      {/* DSA Chatbot */}
+      {!chatbotOpen && (
+        <Button
+          onClick={() => setChatbotOpen(true)}
+          className="fixed bottom-6 right-6 rounded-full w-16 h-16 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90"
+          size="lg"
+        >
+          <span className="text-2xl">🤖</span>
+        </Button>
+      )}
+      
+      {chatbotOpen && (
+        <DSAChatbot
+          isMinimized={chatbotMinimized}
+          onToggleMinimize={() => setChatbotMinimized(!chatbotMinimized)}
+          onClose={() => {
+            setChatbotOpen(false);
+            setChatbotMinimized(false);
+          }}
+        />
+      )}
     </div>
   );
 };

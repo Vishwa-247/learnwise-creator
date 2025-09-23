@@ -16,12 +16,15 @@ import {
   TrendingUp,
   Star,
   Briefcase,
-  ArrowRight
+  ArrowRight,
+  User
 } from "lucide-react";
 import Container from "@/components/ui/Container";
 import { useToast } from "@/hooks/use-toast"; 
 import ResumePreview from "@/components/profile/ResumePreview";
 import JobRoleSuggestions from "@/components/resume/JobRoleSuggestions";
+import { useProfile } from "@/hooks/useProfile";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function ResumeAnalyzer() {
   const [step, setStep] = useState<'job-role' | 'upload' | 'analysis'>('job-role');
@@ -31,6 +34,8 @@ export default function ResumeAnalyzer() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<any>(null);
   const { toast } = useToast();
+  const { user } = useAuth();
+  const { uploadResume, applyExtractedData } = useProfile();
 
   const handleJobRoleSubmit = () => {
     if (!jobRole.trim()) {
@@ -85,7 +90,7 @@ export default function ResumeAnalyzer() {
       
       // The backend returns the analysis directly
       const analysisData = result.analysis;
-      setAnalysisResult({
+      const analysisResults = {
         score: analysisData.overall_score,
         jobMatchScore: analysisData.job_match_score,
         atsScore: analysisData.ats_score,
@@ -100,15 +105,30 @@ export default function ResumeAnalyzer() {
         deepAnalysis: analysisData.deep_analysis,
         sectionsAnalysis: analysisData.sections_analysis,
         improvementPriority: analysisData.improvement_priority,
-        roleSpecificAdvice: analysisData.role_specific_advice
-      });
+        roleSpecificAdvice: analysisData.role_specific_advice,
+        extractedData: result.extracted_data
+      };
       
+      setAnalysisResult(analysisResults);
       setIsAnalyzing(false);
       
       toast({
         title: "Analysis Complete",
         description: `Your resume has been analyzed for ${jobRole} positions!`
       });
+
+      // Ask user if they want to update their profile
+      if (user && result.extracted_data) {
+        setTimeout(() => {
+          const shouldUpdateProfile = window.confirm(
+            "🤖 AI Agent: I've extracted profile data from your resume analysis. Would you like me to auto-fill your profile with this data?\n\nClick OK to update your profile, or Cancel to skip."
+          );
+          
+          if (shouldUpdateProfile) {
+            handleUpdateProfile(result.extracted_data);
+          }
+        }, 2000);
+      }
     } catch (error) {
       console.error("Analysis failed:", error);
       setIsAnalyzing(false);
@@ -116,6 +136,35 @@ export default function ResumeAnalyzer() {
         title: "Analysis Failed",
         description: "Something went wrong. Please try again.",
         variant: "destructive"
+      });
+    }
+  };
+
+  const handleUpdateProfile = async (extractedData: any) => {
+    if (!user) return;
+    
+    try {
+      toast({
+        title: "🤖 Updating Profile...",
+        description: "Applying extracted data to your profile sections.",
+      });
+
+      const success = await applyExtractedData(extractedData);
+      
+      if (success) {
+        toast({
+          title: "✅ Profile Updated!",
+          description: "Your profile has been updated with the analyzed resume data.",
+        });
+      } else {
+        throw new Error('Failed to update profile');
+      }
+    } catch (error) {
+      console.error('Failed to update profile:', error);
+      toast({
+        title: "Update Failed",
+        description: "Couldn't update your profile. Please try again.",
+        variant: "destructive",
       });
     }
   };
@@ -492,9 +541,16 @@ export default function ResumeAnalyzer() {
 
             {/* Action Buttons */}
             <div className="flex gap-4">
-              <Button size="lg" className="flex-1">
-                Update My Profile with Analysis
-              </Button>
+              {user && analysisResult.extractedData && (
+                <Button 
+                  size="lg" 
+                  className="flex-1"
+                  onClick={() => handleUpdateProfile(analysisResult.extractedData)}
+                >
+                  <User className="h-4 w-4 mr-2" />
+                  Update My Profile with Analysis
+                </Button>
+              )}
               <Button variant="outline" size="lg" onClick={startOver}>
                 Analyze Another Role
               </Button>
